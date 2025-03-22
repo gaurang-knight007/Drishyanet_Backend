@@ -15,7 +15,7 @@ const port = process.env.PORT || 5000;
 
 // Enable CORS for Vercel frontend
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "https://your-frontend.vercel.app",
+  origin: process.env.FRONTEND_URL,
   methods: "GET,POST,PUT,DELETE",
   credentials: true
 };
@@ -25,7 +25,7 @@ app.use(cors(corsOptions));
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const url = process.env.MONGO_URI || 'mongodb://localhost:27017';
+const url = process.env.MONGO_URI;
 if (!url) {
   console.error("MONGO_URI is not set in the environment variables.");
   process.exit(1);
@@ -76,7 +76,22 @@ app.use(express.json());
 
 app.use(upload.single('image'));
 
+
 // API Routes
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to the Drishyanet API!",
+    status: "success",
+    date: new Date().toISOString(),
+  });
+});
+
+//to check
+app.get("/config", (req, res) => {
+    res.json({ frontendUrl: process.env.FRONTEND_URL });
+});
+
 app.post('/signup', async (req, res) => {
   const { name, email, password } = req.body;
   if (!db) return res.status(500).send('Internal Server Error');
