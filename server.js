@@ -12,7 +12,7 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT; 
-const allowedOrigin = process.env.FRONTEND_URL || "https://drishyanet.vercel.app"; 
+const allowedOrigin = "https://drishyanet.vercel.app"; 
 
 const corsOptions = {
   origin: allowedOrigin,
