@@ -12,13 +12,15 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT; 
+const allowedOrigin = process.env.FRONTEND_URL || "https://drishyanet.vercel.app"; 
 
-// Enable CORS for Vercel frontend
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: allowedOrigin,
   methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: ["Content-Type"],
   credentials: true
 };
+
 app.use(cors(corsOptions));
 
 // Multer configuration for handling file uploads
