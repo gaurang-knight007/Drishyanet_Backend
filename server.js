@@ -11,7 +11,7 @@ const canvas = require('canvas');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 5000; 
+const port = process.env.PORT; 
 
 // Enable CORS for Vercel frontend
 const corsOptions = {
@@ -26,6 +26,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 const url = process.env.MONGO_URI;
+console.log(url);
 if (!url) {
   console.error("MONGO_URI is not set in the environment variables.");
   process.exit(1);
