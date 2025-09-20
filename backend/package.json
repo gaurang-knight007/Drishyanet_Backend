@@ -1,0 +1,31 @@
+{
+  "dependencies": {
+    "@tensorflow-models/face-landmarks-detection": "^1.0.6",
+    "@tensorflow/tfjs": "^4.22.0",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^1.20.3",
+    "canvas": "^3.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "face-api.js": "^0.22.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^3.1.9",
+    "path": "^0.12.7",
+    "serve-static": "^1.16.2"
+  },
+  "name": "Drishyanet-backend",
+  "version": "3.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
