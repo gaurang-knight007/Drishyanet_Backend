@@ -1,0 +1,9 @@
+Flask
+flask-cors
+pymongo
+face_recognition
+opencv-python-headless
+numpy
+python-jose
+PyJWT
+dotenv
