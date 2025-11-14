@@ -9,10 +9,10 @@ const bcrypt = require("bcrypt");
 
 require('dotenv').config();
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET || "myjwtsecret";
 const app = express();
-const port = process.env.PORT;
-const allowedOrigin = process.env.FRONTEND_URL;
+const port = process.env.PORT || 4000;
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:3000";
 
 const corsOptions = {
   origin: allowedOrigin,
@@ -26,7 +26,7 @@ app.use(cors(corsOptions));
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const url = process.env.MONGO_URI;
+const url = process.env.MONGO_URI || "mongodb://localhost:27017/";
 if (!url) {
   console.error("MONGO_URI is not set in the environment variables.");
   process.exit(1);

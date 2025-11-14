@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET = os.getenv("JWT_SECRET", "defaultsecretkey")
+SECRET = os.getenv("JWT_SECRET", "myjwtsecret")
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 FLASK_PORT = int(os.getenv("FLASK_PORT", 5000))
 
@@ -156,6 +156,63 @@ def gen_frames(subject):
 
     cap.release()
 
+security_streaming = False
+
+def gen_security_feed(target_name, target_encoding):
+        global security_streaming
+        cap = cv2.VideoCapture(0)
+        #here
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        #here
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        #here
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        while security_streaming:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            
+            # Resize frame for faster detection
+            #here
+            small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+            #here
+            small_frame = cv2.GaussianBlur(small_frame, (0, 0), 1)
+            #here
+            small_frame = cv2.addWeighted(small_frame, 1.5, small_frame, -0.5, 0)
+            
+            rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+
+            # Detect all faces in frame
+            face_locations = face_recognition.face_locations(rgb_small_frame)
+            face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
+
+            detected = False
+            for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+                matches = face_recognition.compare_faces([target_encoding], face_encoding, tolerance=0.50)
+                top, right, bottom, left = [v * 4 for v in (top, right, bottom, left)]
+
+                if matches[0]:
+                    # ✅ Target student found — green box + label
+                    cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 3)
+                    cv2.putText(frame, f"{target_name} DETECTED!", (left, top - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                    detected = True
+                else:
+                    # ✅ Other faces — red box, no label
+                    cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+            if detected:
+                cv2.putText(frame, f"{target_name} DETECTED near CAMERA 1", (30, 50),
+                            cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 255, 0), 2)
+
+            # Encode and yield the frame
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        cap.release()
+
 
 @app.route("/api/attendance/start")
 def start_attendance():
@@ -279,6 +336,31 @@ def delete_attendance():
     db[subject].delete_one({"name": name, "date": date})
     return jsonify({"message": f"Attendance record deleted"})
 
+@app.route("/api/security/stop", methods=["POST"])
+@token_required
+def stop_security():
+    global security_streaming
+    security_streaming = False
+    return jsonify({"message": "Security feed stopped"})
+
+
+
+@app.route("/api/security/search", methods=["GET"])
+def search_student():
+    global security_streaming
+    target_name = request.args.get("name")
+    if not target_name:
+        return jsonify({"error": "Missing ?name= parameter"}), 400
+
+    record = db["encodings"].find_one({"name": target_name}, {"_id": 0})
+    if not record:
+        return jsonify({"error": f"No encoding found for {target_name}"}), 404
+
+    target_encoding = np.array(record["encoding"])
+    security_streaming = True  # mark as active
+    return Response(gen_security_feed(target_name, target_encoding),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=FLASK_PORT)
+    #here
+    app.run(host="0.0.0.0", port=FLASK_PORT, threaded=True)
