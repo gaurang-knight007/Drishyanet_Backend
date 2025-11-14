@@ -1,11 +1,9 @@
-numpy
-flask
+Flask
 flask-cors
 pymongo
+face_recognition
+opencv-python-headless
+numpy
 python-jose
 PyJWT
-python-dotenv
-face-recognition
-dlib==19.24.2
-opencv-python-headless
---only-binary=:all:
+dotenv
